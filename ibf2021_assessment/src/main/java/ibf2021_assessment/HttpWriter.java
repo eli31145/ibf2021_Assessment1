@@ -1,5 +1,4 @@
-// TODO: Change to your package 
-package mywebserver;
+package ibf2021_assessment;
 
 import java.io.*;
 

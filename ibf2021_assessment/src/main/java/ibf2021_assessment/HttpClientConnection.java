@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -38,11 +39,12 @@ public class HttpClientConnection implements Runnable{
             //case 1: GET not correct
             
             if (!array[0].equals("GET")){
-                System.out.println("Method Not Allowed\r\n\r\n <method name> not supported\r\n");
-                //close thread
                 try {
+                    writer.writeString("HTTP/1.1 405 Method Not Allowed");
+                    writer.writeString();
+                    writer.writeString("checkPath" + "not supported");
                     socket.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             } 
@@ -53,10 +55,12 @@ public class HttpClientConnection implements Runnable{
                 File f1 = p1.toFile();
 
                 if (!f1.exists()) {
-                    System.out.println("Not Found\r\n\r\n <resource name> not found\r\n");
-                try {
-                    socket.close();
-                } catch (IOException e) {
+                    try {
+                        writer.writeString("HTTP/1.1 404 Not Found");
+                        writer.writeString();
+                        writer.writeString(fullDirectory + "not found");
+                        socket.close();
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -65,7 +69,8 @@ public class HttpClientConnection implements Runnable{
                 try {
                 writer.writeString("HTTP/1.1 200OK");
                 writer.writeString();
-                writer.writeString("<resource contents as bytes>");
+                writer.writeString(array[1]);
+                writer.writeBytes(Files.readAllBytes(p1));
                 socket.close();
                 } catch (Exception e)   {
                     e.printStackTrace();
@@ -76,9 +81,10 @@ public class HttpClientConnection implements Runnable{
                     if (array[0].equals("GET") && f1.exists() && fullDirectory.contains("png")){
                         try {
                         writer.writeString("HTTP/1.1 200OK");
-                        writer.writeString("Content-Type: image/png");
+                        writer.writeString("Content-Type: image/png \n");
                         writer.writeString();
-                        writer.writeString("<resource contents as bytes>");
+                        writer.writeString(array[1]);
+                        writer.writeBytes(Files.readAllBytes(p1));
                         socket.close();
                         } catch (Exception e)   {
                             e.printStackTrace();
